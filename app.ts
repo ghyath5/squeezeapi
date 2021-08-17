@@ -2,7 +2,7 @@ import "reflect-metadata";
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { PrismaClient } from '@prisma/client';
-import cors from "cors";
+import cors, { CorsOptions } from "cors";
 import {  ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } from 'apollo-server-core';
 import {buildSchema} from 'type-graphql'
 import resolvers from './Resolvers'
@@ -58,10 +58,8 @@ async function startApolloServer() {
   await server.start();
 
   const app = express();
-  // var corsOptions = {
-  //   credentials: true
-  // };
-  // app.use(cors(corsOptions));
+  const corsOptions:CorsOptions = {credentials: true, origin: 'https://studio.apollographql.com'}
+  app.use(cors(corsOptions));
   app.use(cookieParser())
   app.use('/graphql',async (req,res,next)=>{
     if(!req?.cookies?.authorization)return next();
