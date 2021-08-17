@@ -16,16 +16,14 @@ generator typegraphql {
 }
 
 model User {
-  id                     String    @id @default(uuid())
-  name                   String
-  email                  String?   @unique
-  phone_number           String?   @unique
-  /// @TypeGraphQL.omit(output: true)
-  password               String?
-  phoneNumberConfirmedAt DateTime?
-  role                   Role      @default(USER)
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @default(now()) @updatedAt
+  id           String   @id @default(uuid())
+  name         String
+  email        String?  @unique
+  phone_number String?  @unique
+  // phoneNumberConfirmedAt DateTime?
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
 }
 
 model Service {
