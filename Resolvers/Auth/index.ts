@@ -10,7 +10,6 @@ import {  AuthResponse, LoginInputData, RegisterInputData } from './types';
 @Resolver()
 export class Auth {
 
-
   @Mutation(()=>AuthResponse)
   async register(
     @Arg("RegisterInputData") data:RegisterInputData,
@@ -92,5 +91,10 @@ export class Auth {
       isConfirmed:Boolean(user.phoneNumberConfirmedAt)
     }
     
+  }
+
+  @Query(()=>String)
+  me():string{
+    return 'Hi'
   }
 }
