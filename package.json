@@ -1,0 +1,42 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ts-node-dev ./app.ts",
+    "start": "ts-node dist/app.js",
+    "generate": "ts-node ./prisma/generator.ts",
+    "build": "tsc -p ."
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/express": "^4.17.13",
+    "@types/express-jwt": "^6.0.2",
+    "@types/jsonwebtoken": "^8.5.4",
+    "@types/node": "^16.6.1",
+    "@types/redis": "^2.8.31",
+    "express": "^4.17.1",
+    "prisma": "2.29.1",
+    "ts-node-dev": "^1.1.8",
+    "typegraphql-prisma": "^0.14.8",
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "@paljs/plugins": "^3.8.2",
+    "@prisma/client": "2.29.1",
+    "apollo-server-express": "^3.1.2",
+    "bcrypt": "^5.0.1",
+    "class-validator": "^0.13.1",
+    "cors": "^2.8.5",
+    "express-jwt": "^6.1.0",
+    "graphql": "^15.5.1",
+    "graphql-fields": "^2.0.3",
+    "graphql-middleware": "^6.1.2",
+    "graphql-scalars": "^1.10.0",
+    "jsonwebtoken": "^8.5.1",
+    "redis": "^3.1.2",
+    "reflect-metadata": "^0.1.13",
+    "type-graphql": "^1.1.1"
+  }
+}

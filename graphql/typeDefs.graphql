@@ -1,0 +1,7 @@
+# import "../prisma/schema.gql"
+input UserRegisterInput{
+    
+}
+type Mutation{
+    register(data: UserRegisterInput!): User!
+}
