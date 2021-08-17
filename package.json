@@ -8,7 +8,7 @@
     "start": "ts-node dist/app.js",
     "generate": "ts-node ./prisma/generator.ts",
     "build": "tsc -p .",
-    "postinstall": "prisma generate && yarn build"
+    "postinstall": "prisma generate"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
@@ -38,6 +38,7 @@
     "jsonwebtoken": "^8.5.1",
     "redis": "^3.1.2",
     "reflect-metadata": "^0.1.13",
+    "ts-node": "^10.2.0",
     "type-graphql": "^1.1.1"
   }
 }
