@@ -7,8 +7,8 @@
     "dev": "ts-node-dev ./app.ts",
     "start": "ts-node dist/app.js",
     "generate": "ts-node ./prisma/generator.ts",
-    "build": "prisma generate & tsc -p .",
-    "postinstall": "yarn build"
+    "build": "tsc -p .",
+    "postinstall": "prisma generate && yarn build"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
