@@ -26,6 +26,7 @@
   "dependencies": {
     "@paljs/plugins": "^3.8.2",
     "@prisma/client": "2.29.1",
+    "apollo-server-core": "^3.1.2",
     "apollo-server-express": "^3.1.2",
     "bcrypt": "^5.0.1",
     "class-validator": "^0.13.1",

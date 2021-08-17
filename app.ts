@@ -3,6 +3,7 @@ import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import { PrismaClient } from '@prisma/client';
 import cors from "cors";
+import { ApolloServerPluginLandingPageGraphQLPlayground, ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } from 'apollo-server-core';
 import {buildSchema} from 'type-graphql'
 import resolvers from './Resolvers'
 import jwt from "express-jwt";
@@ -44,7 +45,12 @@ async function startApolloServer() {
       }
     }, 
     schema,
-    context: (ctx) => ({ prisma,ctx,quickStore:quickStore(ctx)})
+    context: (ctx) => ({ prisma,ctx,quickStore:quickStore(ctx)}),
+    plugins: [
+      process.env.NODE_ENV === 'production' ?
+      ApolloServerPluginLandingPageProductionDefault({ footer: false }) :
+      ApolloServerPluginLandingPageLocalDefault({ footer: false })
+    ]
   });
   await server.start();
 
