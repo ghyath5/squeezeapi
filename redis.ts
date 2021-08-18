@@ -15,7 +15,7 @@ export const quickStore = (ctx?:any)=>{
             client.set(key,value)
             client.expire(key,expires)
         },
-        setTable:(uid?:any|undefined,...data: any):Boolean=>{
+        setTable:(uid?:string|undefined,...data: any):Boolean=>{
             if(!userId && !uid)return false;
             let uuid = userId || uid
             let key = `${prefix}${uuid}`
