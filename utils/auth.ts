@@ -19,7 +19,6 @@ export const sendTokens = ({role,userId}:{role:string,userId:string},ctx:Express
     ctx.res.cookie('authorization',`${token}`,{httpOnly:true,sameSite:'none',secure:true})
     ctx.res.cookie('x-refresh-token',refreshToken,{httpOnly:true,sameSite:'none',secure:true})
 }
-
 // export const hashPassword =  (password: string | Buffer)=>{
 //     return bcrypt.hashSync(password, 6)
 // }
@@ -27,15 +26,6 @@ export const sendTokens = ({role,userId}:{role:string,userId:string},ctx:Express
 // export const compareHashedPassword = (password: string | Buffer,hash: string)=>{
 //     return bcrypt.compareSync(password,hash)
 // }
-
-export const generateNumberBetween = (min: number,max: number)=>{
-    return Math.random() * (max - min) + min;
-}
-
-export const generateCode = (len: number):string=>{
-    let num = ((Math.random() * 9 + 1) * Math.pow(10,len-1))
-    return num.toFixed()
-}
 
 export const verifyToken = async (ctx:ExpressContext,token: string):Promise<Boolean | jwt.JwtPayload>=>{
     try{
@@ -62,4 +52,10 @@ export const verifyToken = async (ctx:ExpressContext,token: string):Promise<Bool
         }        
         return false
     }
+}
+
+
+export const generateCode = (len: number):string=>{
+  let num = ((Math.random() * 9 + 1) * Math.pow(10,len-1))
+  return num.toFixed()
 }
