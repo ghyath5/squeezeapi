@@ -16,8 +16,8 @@ export const generateToken = (payload: string | object | Buffer,expiresIn: strin
 export const sendTokens = ({role,userId}:{role:string,userId:string},ctx:ExpressContext)=>{
     let token = generateToken({userId,role},`${config.tokenExpiration}s`)
     let refreshToken = generateToken({userId,role},`${config.refreshTokenExpiration}s`)
-    ctx.res.cookie('authorization',`${token}`,{httpOnly:true})
-    ctx.res.cookie('x-refresh-token',refreshToken,{httpOnly:true})
+    ctx.res.cookie('authorization',`${token}`,{httpOnly:true,sameSite:'none',secure:true})
+    ctx.res.cookie('x-refresh-token',refreshToken,{httpOnly:true,sameSite:'none',secure:true})
 }
 
 // export const hashPassword =  (password: string | Buffer)=>{
@@ -39,7 +39,7 @@ export const generateCode = (len: number):string=>{
 
 export const verifyToken = async (ctx:ExpressContext,token: string):Promise<Boolean | jwt.JwtPayload>=>{
     try{
-        let payload = jwt.verify(token,(process.env.APP_SECRET as string)) as jwt.JwtPayload
+        let payload = jwt.verify(token, (process.env.APP_SECRET as string)) as jwt.JwtPayload
         ctx.req.payload = payload
         return payload;
       }catch(e){

@@ -14,6 +14,7 @@ import { GraphQLResolveInfo } from "graphql";
 import { quickStore } from "./redis";
 import cookieParser from 'cookie-parser'
 import { verifyToken } from "./utils/auth";
+import { Context } from "./@types/types";
 
 const prisma = new PrismaClient();
 const middleware = async (resolve, root, args, context, info: GraphQLResolveInfo) => {
@@ -29,8 +30,10 @@ const middleware = async (resolve, root, args, context, info: GraphQLResolveInfo
 async function startApolloServer() {
   let schema = await buildSchema({
     resolvers,
-    authChecker:({context:{req},args,root},roles)=>{
-      if(!req?.payload)return false;
+    authChecker:({context}:{context:Context},roles)=>{
+      let req = context?.ctx?.req
+      if(!req?.authenticated)return false;
+      
       if(!arrayNotEmpty(roles) || roles.includes(req?.payload?.role)){
         return true
       }
@@ -64,7 +67,8 @@ async function startApolloServer() {
   app.use('/graphql',async (req,res,next)=>{
     if(!req?.cookies?.authorization)return next();
     let token = req?.cookies?.authorization
-    await verifyToken({req,res},token)
+    let result = await verifyToken({req,res},token)    
+    req.authenticated = result
     next()
   })
   server.applyMiddleware({ app,cors:false });
