@@ -1,10 +1,11 @@
-import { PrismaClient, Role, User } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import { ExpressContext } from 'apollo-server-express';
 import {  Arg, Authorized, Ctx, Mutation, Query, Resolver} from 'type-graphql'
-import {  StoreType } from '../../redis';
-import {  sendTokens } from '../../utils/auth';
+import {User} from '../../prisma/generated/typegraphql'
+// import {  StoreType } from '../../redis';
+// // import {  destoryTokens, sendTokens } from '../../utils/auth';
 import { Guest } from '../CustomDecorators';
-import { sendSmsCode } from './actions';
+// import { sendSmsCode } from './actions';
 import {  AuthResponse, LoginInputData, RegisterInputData } from './types';
 
 @Resolver()
@@ -13,7 +14,7 @@ export class Auth {
   @Mutation(()=>AuthResponse)
   async register(
     @Arg("RegisterInputData") data:RegisterInputData,
-    @Ctx() {prisma,ctx,quickStore}:{prisma:PrismaClient,ctx:ExpressContext,quickStore:StoreType}
+    @Ctx() {prisma,ctx}:{prisma:PrismaClient,ctx:ExpressContext}
   ): Promise<AuthResponse> {
     let user = await prisma.user.findFirst({
       where:{
@@ -24,20 +25,18 @@ export class Auth {
       }
     })
     if(user){
-      return {
-        message:data.email==user.email?'email already in use':'phone number already in use',
-        isSuccess:false
-      }
+      throw new Error(data.email==user.email?'email already in use':'phone number already in use')
+      
     }
     // data.password = hashPassword(data.password)
     user = await prisma.user.create({data})
-    sendTokens({
+    ctx?.req?.actions?.sendTokens({
       userId:user.id,
       role:'UNCONFIRMED',
-    },ctx);
+    });
     // if(!user.phoneNumberConfirmedAt){
       // send verification code
-    sendSmsCode(user)
+    ctx.req.actions?.sendLoginCode(user.id)
     // }
     return {
       message:'Code sent',
@@ -50,7 +49,7 @@ export class Auth {
   @Mutation(()=>AuthResponse)
   async login(
     @Arg("LoginInputData") data:LoginInputData,
-    @Ctx() {prisma,ctx,quickStore}:{prisma:PrismaClient,ctx:ExpressContext,quickStore:StoreType}
+    @Ctx() {prisma,ctx}:{prisma:PrismaClient,ctx:ExpressContext}
   ):Promise<AuthResponse>{
     const {phone_number} = data
     const login = phone_number
@@ -58,10 +57,7 @@ export class Auth {
       where:{phone_number:{equals:login}}
     })
     if(!user || !phone_number) {
-      return {
-        message:'no user found',
-        isSuccess:false,
-      }
+      throw new Error("No user found")
     }
     // let isPasswordCorrect = compareHashedPassword(password,user.password)
     // if(!isPasswordCorrect){
@@ -69,14 +65,14 @@ export class Auth {
     //     message:'incorrect password',
     //     isSuccess:false
     //   }
-    // }
-    sendTokens({
+    // }    
+    ctx?.req?.actions?.sendTokens({
       userId:user.id,
       role:'UNCONFIRMED',
-    },ctx);
+    });
     // if(!user.phoneNumberConfirmedAt){
       // send verification code
-    sendSmsCode(user)
+    ctx.req.actions?.sendLoginCode(user.id)
     // }
     return {
       message:'Code sent',
@@ -88,29 +84,36 @@ export class Auth {
   @Mutation(()=>AuthResponse)
   async verifyOTP(
     @Arg("OTPcode") code:string,
-    @Ctx() {prisma,ctx,quickStore}:{prisma:PrismaClient,ctx:ExpressContext,quickStore:StoreType}
-  ):Promise<AuthResponse>{      
-    let storedCode = await quickStore.getTable('phone_number_verification_code')
+    @Ctx() {prisma,ctx}:{prisma:PrismaClient,ctx:ExpressContext}
+  ):Promise<AuthResponse>{    
+    let storedCode = await ctx?.req?.quickStore.getTable('phone_number_verification_code')
     if(storedCode != code){
-      return {
-        message:'incorrect code',
-        isSuccess:false
-      }
+      throw new Error("Incorrect code")
     }
-    sendTokens({
+    ctx?.req?.actions?.sendTokens({
       role:'USER',
       userId:ctx.req?.payload?.userId
-    },ctx)
+    })
     let user = await prisma.user.findUnique({where:{id:ctx?.req?.payload?.userId}}) as User
     return {
       message:'Success',
       isSuccess:true,
-      user
+      user,
+      isConfirmed:true
     }
   }
 
-  @Query(()=>String)
-  me():string{
-    return 'Hi'
+  @Authorized()
+  @Mutation(()=>Boolean)
+  logout(@Ctx() {ctx}:{ctx:ExpressContext}):Boolean{
+    ctx.req.actions.destoryTokens()
+    return true
+  }
+
+  @Authorized(Role.USER)
+  @Query(()=>User)
+  async me(@Ctx() {prisma,ctx}:{prisma:PrismaClient,ctx:ExpressContext}):Promise<User>{
+    let me = await prisma.user.findUnique({where:{id:ctx.req.payload.userId}}) as User
+    return me;
   }
 }
