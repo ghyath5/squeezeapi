@@ -64,11 +64,10 @@ async function startApolloServer() {
   app.use('/graphql',async (req,res,next)=>{
     if(!req?.cookies?.authorization)return next();
     let token = req?.cookies?.authorization
-    
     await verifyToken({req,res},token)
     next()
   })
-  server.applyMiddleware({ app });
+  server.applyMiddleware({ app,cors:false });
   app.listen({ port:process.env.PORT||4000 }, ()=>console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`))
 }
 
