@@ -1,4 +1,4 @@
-import {  IsEmail, MinLength } from "class-validator";
+import {  IsEmail } from "class-validator";
 import { Field, InputType, ObjectType } from "type-graphql";
 import {User} from '../../prisma/generated/typegraphql'
 
@@ -12,14 +12,16 @@ export class RegisterInputData {
   phone_number:string
 
   @Field()
-  @MinLength(2)
-  name:string
+  firstName:string
+
+  @Field()
+  lastName:string
 }
 
 //login input data
 @InputType()
 export class LoginInputData {
-  @Field({nullable:true})
+  @Field()
   phone_number:string  
 }
 
