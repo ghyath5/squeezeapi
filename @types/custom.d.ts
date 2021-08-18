@@ -1,6 +1,7 @@
 declare namespace Express {
     interface Request {
         payload?:any
-        authenticated:any
+        quickStore:import("../redis").StoreType
+        actions:import("../Resolvers/Auth/actions").ActionsType
     }
 }
