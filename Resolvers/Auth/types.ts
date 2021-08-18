@@ -14,7 +14,6 @@ export class RegisterInputData {
   @Field()
   @MinLength(2)
   name:string
-
 }
 
 //login input data

@@ -3,12 +3,13 @@ import { ExpressContext } from 'apollo-server-express';
 import {  Arg, Authorized, Ctx, Mutation, Query, Resolver} from 'type-graphql'
 import {  StoreType } from '../../redis';
 import {  sendTokens } from '../../utils/auth';
+import { Guest } from '../CustomDecorators';
 import { sendSmsCode } from './actions';
 import {  AuthResponse, LoginInputData, RegisterInputData } from './types';
 
 @Resolver()
 export class Auth {
-
+  @Guest()
   @Mutation(()=>AuthResponse)
   async register(
     @Arg("RegisterInputData") data:RegisterInputData,
@@ -45,7 +46,7 @@ export class Auth {
     }
   }
 
-
+  @Guest()
   @Mutation(()=>AuthResponse)
   async login(
     @Arg("LoginInputData") data:LoginInputData,
@@ -56,7 +57,7 @@ export class Auth {
     const user = await prisma.user.findFirst({
       where:{phone_number:{equals:login}}
     })
-    if(!user) {
+    if(!user || !phone_number) {
       return {
         message:'no user found',
         isSuccess:false,
