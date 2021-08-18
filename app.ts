@@ -15,6 +15,7 @@ import { quickStore } from "./redis";
 import cookieParser from 'cookie-parser'
 import { verifyToken } from "./utils/auth";
 import { Context } from "./@types/types";
+import Actions from "./Resolvers/Auth/actions";
 
 const prisma = new PrismaClient();
 const middleware = async (resolve, root, args, context, info: GraphQLResolveInfo) => {
@@ -32,8 +33,7 @@ async function startApolloServer() {
     resolvers,
     authChecker:({context}:{context:Context},roles)=>{
       let req = context?.ctx?.req
-      if(!req?.authenticated)return false;
-      
+      if(!req?.payload)return false;
       if(!arrayNotEmpty(roles) || roles.includes(req?.payload?.role)){
         return true
       }
@@ -41,7 +41,6 @@ async function startApolloServer() {
     }
   });
   schema = applyMiddleware(schema, middleware);
-
   const server = new ApolloServer({
     formatError: (error) => {
       return {
@@ -51,7 +50,7 @@ async function startApolloServer() {
     },
     introspection:process.env.NODE_ENV !== 'production',
     schema,
-    context: (ctx) => ({ prisma,ctx,quickStore:quickStore(ctx)}),
+    context: (ctx):Context => ({ prisma,ctx}),
     plugins: [
       process.env.NODE_ENV === 'production' ?
       ApolloServerPluginLandingPageProductionDefault({ footer: false }) :
@@ -65,10 +64,10 @@ async function startApolloServer() {
   app.use(cors(corsOptions));
   app.use(cookieParser())
   app.use('/graphql',async (req,res,next)=>{
-    if(!req?.cookies?.authorization)return next();
     let token = req?.cookies?.authorization
-    let result = await verifyToken({req,res},token)    
-    req.authenticated = result
+    await verifyToken({req,res},token)
+    req.quickStore = quickStore({req,res})
+    req.actions = Actions({req,res})
     next()
   })
   server.applyMiddleware({ app,cors:false });
