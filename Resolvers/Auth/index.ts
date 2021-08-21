@@ -19,7 +19,7 @@ export class Auth {
       where:{
         OR:[
           {email:{equals:data.email}},
-          {phone_number:{equals:data.phone_number}}
+          {phoneNumber:{equals:data.phoneNumber}}
         ]
       }
     })
@@ -49,21 +49,17 @@ export class Auth {
     @Arg("LoginInputData") data:LoginInputData,
     @Ctx() {prisma,ctx}:{prisma:PrismaClient,ctx:ExpressContext}
   ):Promise<AuthResponse>{
-    const {phone_number} = data
-    const login = phone_number
-    const user = await prisma.user.findFirst({
-      where:{phone_number:{equals:login}}
-    })
-    if(!user || !phone_number) {
+    const {phoneNumber} = data
+    const login = phoneNumber
+    if(!phoneNumber) {
       throw new Error("No user found")
     }
-    // let isPasswordCorrect = compareHashedPassword(password,user.password)
-    // if(!isPasswordCorrect){
-    //   return {
-    //     message:'incorrect password',
-    //     isSuccess:false
-    //   }
-    // }    
+    const user = await prisma.user.findFirst({
+      where:{phoneNumber:{equals:login}}
+    })
+    if(!user){
+      throw new Error("No user found")
+    }   
     ctx?.req?.actions?.sendTokens({
       userId:user.id,
       roles:['UNCONFIRMED'],
