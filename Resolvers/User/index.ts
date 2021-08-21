@@ -2,7 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
 import {  Authorized, Ctx, Extensions, Query, Resolver, UseMiddleware } from "type-graphql";
 import { AuthorizeSelf } from "../../middlewares";
-import { Role, User,UpdateUserResolver,applyResolversEnhanceMap, applyModelsEnhanceMap } from "../../prisma/generated/typegraphql";
+import { Role, User,UpdateUserResolver,applyResolversEnhanceMap } from "../../prisma/generated/typegraphql";
 
 import { sufficientRoles } from "../../utils/auth";
 
