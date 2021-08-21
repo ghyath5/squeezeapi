@@ -14,12 +14,11 @@ class CommonAuthResponse {
 @Extensions({check:(isLoggedIn,roles)=>!isLoggedIn})
 @InputType()
 export class RegisterInputData {
-  @Field()
-  @IsEmail({})
-  email:string
+  @Field({nullable:true})
+  email?:string
 
   @Field()
-  phone_number:string
+  phoneNumber:string
 
   @Field()
   firstName:string
@@ -32,7 +31,7 @@ export class RegisterInputData {
 @InputType()
 export class LoginInputData {
   @Field()
-  phone_number:string  
+  phoneNumber:string  
 }
 
 @Extensions({check:(isLoggedIn,roles)=>!isLoggedIn})
