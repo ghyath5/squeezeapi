@@ -13,9 +13,9 @@ export const generateToken = (payload: string | object | Buffer,expiresIn: strin
     return token
 }
 
-export const sendTokens = ({role,userId}:{role:string,userId:string},ctx:ExpressContext)=>{
-    let token = generateToken({userId,role},`${config.tokenExpiration}s`)
-    let refreshToken = generateToken({userId,role},`${config.refreshTokenExpiration}s`)
+export const sendTokens = ({roles,userId}:{roles:string[],userId:string},ctx:ExpressContext)=>{
+    let token = generateToken({userId,roles},`${config.tokenExpiration}s`)
+    let refreshToken = generateToken({userId},`${config.refreshTokenExpiration}s`)
     ctx.res.cookie('authorization',`${token}`,{httpOnly:true,sameSite:'none',secure:true})
     ctx.res.cookie('x-refresh-token',refreshToken,{httpOnly:true,sameSite:'none',secure:true})
 }
@@ -43,7 +43,7 @@ export const verifyToken = async (ctx:ExpressContext,token: string):Promise<Bool
             ctx.req.payload = payload
             sendTokens({
                 userId:user.id,
-                role:payload.role,
+                roles:[user.role],
             },ctx)
             return payload;
           }catch(e){
@@ -54,6 +54,11 @@ export const verifyToken = async (ctx:ExpressContext,token: string):Promise<Bool
     }
 }
 
+export const sufficientRoles = (required,mine)=>{
+  return required.some((role)=>{
+      return mine?.includes(role)
+  })
+}
 
 export const generateCode = (len: number):string=>{
   let num = ((Math.random() * 9 + 1) * Math.pow(10,len-1))
