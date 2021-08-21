@@ -8,10 +8,16 @@ const config = {
 }
 const Actions = (ctx:ExpressContext)=>{
     const store = ctx.req.quickStore as StoreType
+    const USER_ID = ctx?.req?.payload?.userId
     return {
-        sendLoginCode:async (userId: string)=>{
+        sendCodeSms:async(phoneNumber,code,message?)=>{
+
+        },
+        sendLoginCode:async function (phoneNumber:string,userId?: string){
+            userId = userId || USER_ID
             const code = generateCode(6)
-            store.set(`phone_number_verification_code:${userId}`,code,60*5)
+            store.set(`phone_number_verification_code:${userId}`,JSON.stringify({code,phoneNumber}),60*5)
+            this.sendCodeSms(phoneNumber,code)
         },
         sendTokens:({roles,userId}:{roles:string[],userId:string})=>{
             let token = generateToken({userId,roles},`${config.tokenExpiration}s`)            
