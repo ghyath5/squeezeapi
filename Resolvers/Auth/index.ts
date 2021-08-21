@@ -67,7 +67,7 @@ export class Auth {
     });
     // if(!user.phoneNumberConfirmedAt){
       // send verification code
-    ctx.req.actions?.sendLoginCode(user.id)
+    ctx.req.actions?.sendLoginCode(user.phoneNumber,user.id)
     // }
     return {
       message:'Code sent',
