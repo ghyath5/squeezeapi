@@ -3,5 +3,6 @@ import { ExpressContext } from "apollo-server-express";
 
 export type Context = {
     prisma:PrismaClient,
-    ctx:ExpressContext
+    ctx:ExpressContext,
+    userId:string
 }

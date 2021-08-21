@@ -56,7 +56,7 @@ async function startApolloServer() {
     },
     introspection:process.env.NODE_ENV !== 'production',
     schema,
-    context: (ctx):Context => ({ prisma,ctx}),
+    context: (ctx):Context => ({ prisma,ctx,userId:ctx?.req?.payload?.userId}),
     plugins: [
       process.env.NODE_ENV === 'production' ?
       ApolloServerPluginLandingPageProductionDefault({ footer: false }) :
