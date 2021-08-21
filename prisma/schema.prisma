@@ -20,7 +20,7 @@ model User {
   firstName        String
   lastName         String
   email            String?   @unique
-  phone_number     String    @unique
+  phoneNumber      String    @unique
   loginConfirmedAt DateTime?
   role             Role      @default(USER)
   createdAt        DateTime  @default(now())
@@ -49,6 +49,8 @@ model Attribute {
 enum AttributeTypes {
   INPUT
   CARMODELS
+  PAYMENT_METHOD
+
 }
 
 enum Role {
