@@ -18,13 +18,13 @@ export class Auth {
     let user = await prisma.user.findFirst({
       where:{
         OR:[
-          {email:{equals:data.email}},
+          ...[data.email?{email:{equals:data.email}}:{}],
           {phoneNumber:{equals:data.phoneNumber}}
         ]
       }
     })
     if(user){
-      throw new Error(data.email==user.email?'email already in use':'phone number already in use')
+      throw new Error(data.phoneNumber==user.phoneNumber?'phone number already in use':'email already in use')
     }
     // data.password = hashPassword(data.password)
     user = await prisma.user.create({data})
