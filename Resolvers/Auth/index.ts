@@ -1,15 +1,14 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { ExpressContext } from 'apollo-server-express';
-import {  Arg, Authorized, Ctx, Mutation, Query, Resolver} from 'type-graphql'
-import {User} from '../../prisma/generated/typegraphql'
-// import {  StoreType } from '../../redis';
-// // import {  destoryTokens, sendTokens } from '../../utils/auth';
+import {  Arg, Authorized, Ctx, Extensions, Mutation, Resolver} from 'type-graphql'
+import { sufficientRoles } from '../../utils/auth';
 import { Guest } from '../CustomDecorators';
-// import { sendSmsCode } from './actions';
-import {  AuthResponse, LoginInputData, RegisterInputData } from './types';
+import {  AuthResponse, LoginInputData, RegisterInputData, VerifyLoginResponse } from './types';
+
 
 @Resolver()
 export class Auth {
+  @Extensions({check:(isLoggedIn,roles)=>!isLoggedIn})
   @Guest()
   @Mutation(()=>AuthResponse)
   async register(
@@ -26,13 +25,12 @@ export class Auth {
     })
     if(user){
       throw new Error(data.email==user.email?'email already in use':'phone number already in use')
-      
     }
     // data.password = hashPassword(data.password)
     user = await prisma.user.create({data})
     ctx?.req?.actions?.sendTokens({
       userId:user.id,
-      role:'UNCONFIRMED',
+      roles:['UNCONFIRMED'],
     });
     // if(!user.phoneNumberConfirmedAt){
       // send verification code
@@ -40,11 +38,11 @@ export class Auth {
     // }
     return {
       message:'Code sent',
-      isSuccess:true,
-      isConfirmed:false
+      isSuccess:true
     }
   }
 
+  @Extensions({check:(isLoggedIn,roles)=>!isLoggedIn})
   @Guest()
   @Mutation(()=>AuthResponse)
   async login(
@@ -68,7 +66,7 @@ export class Auth {
     // }    
     ctx?.req?.actions?.sendTokens({
       userId:user.id,
-      role:'UNCONFIRMED',
+      roles:['UNCONFIRMED'],
     });
     // if(!user.phoneNumberConfirmedAt){
       // send verification code
@@ -80,40 +78,47 @@ export class Auth {
     }    
   }
   
+  @Extensions({check:(isLoggedIn,roles)=>sufficientRoles(['UNCONFIRMED'],roles)})
   @Authorized("UNCONFIRMED")
-  @Mutation(()=>AuthResponse)
+  @Mutation(()=>VerifyLoginResponse)
   async verifyOTP(
     @Arg("OTPcode") code:string,
     @Ctx() {prisma,ctx}:{prisma:PrismaClient,ctx:ExpressContext}
-  ):Promise<AuthResponse>{    
-    let storedCode = await ctx?.req?.quickStore.getTable('phone_number_verification_code')
+  ):Promise<VerifyLoginResponse>{    
+    let storedCode = await ctx?.req?.quickStore.get(`phone_number_verification_code:${ctx.req?.payload?.userId}`)
     if(storedCode != code){
       throw new Error("Incorrect code")
     }
     ctx?.req?.actions?.sendTokens({
-      role:'USER',
+      roles:['USER'],
       userId:ctx.req?.payload?.userId
     })
-    let user = await prisma.user.findUnique({where:{id:ctx?.req?.payload?.userId}}) as User
+    // let user = await prisma.user.findUnique({where:{id:ctx?.req?.payload?.userId}}) as User
     return {
       message:'Success',
-      isSuccess:true,
-      user,
-      isConfirmed:true
+      isSuccess:true
     }
   }
 
+  @Extensions({check:(isLoggedIn,roles)=>sufficientRoles(['UNCONFIRMED'],roles)})
+  @Authorized("UNCONFIRMED")
+  @Mutation(()=>VerifyLoginResponse)
+  async resendOTP(
+    @Ctx() {prisma,ctx}:{prisma:PrismaClient,ctx:ExpressContext}
+  ):Promise<VerifyLoginResponse>{
+    let userId = ctx?.req?.payload?.userId
+    ctx.req.actions?.sendLoginCode(userId)
+    return {
+      message:'Code sent',
+      isSuccess:true
+    }
+  }
+
+  @Extensions({check:(isLoggedIn,roles)=>Boolean(isLoggedIn)})
   @Authorized()
   @Mutation(()=>Boolean)
   logout(@Ctx() {ctx}:{ctx:ExpressContext}):Boolean{
     ctx.req.actions.destoryTokens()
     return true
-  }
-
-  @Authorized(Role.USER)
-  @Query(()=>User)
-  async me(@Ctx() {prisma,ctx}:{prisma:PrismaClient,ctx:ExpressContext}):Promise<User>{
-    let me = await prisma.user.findUnique({where:{id:ctx.req.payload.userId}}) as User
-    return me;
   }
 }
