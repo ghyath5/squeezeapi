@@ -10,12 +10,14 @@ import resolvers from './Resolvers'
 import { arrayNotEmpty } from "class-validator";
 import { applyMiddleware } from 'graphql-middleware';
 import {  PrismaSelect } from '@paljs/plugins';
-import { GraphQLResolveInfo } from "graphql";
+import {  GraphQLResolveInfo} from "graphql";
 import { quickStore } from "./redis";
 import cookieParser from 'cookie-parser'
-import { verifyToken } from "./utils/auth";
+import { sufficientRoles, verifyToken } from "./utils/auth";
 import { Context } from "./@types/types";
 import Actions from "./Resolvers/Auth/actions";
+import { PruneSchema, wrapSchema } from '@graphql-tools/wrap';
+import { FilterSchema } from "./limitIntrospection";
 
 const prisma = new PrismaClient();
 const middleware = async (resolve, root, args, context, info: GraphQLResolveInfo) => {
@@ -34,13 +36,17 @@ async function startApolloServer() {
     authChecker:({context}:{context:Context},roles)=>{
       let req = context?.ctx?.req
       if(!req?.payload)return false;
-      if(!arrayNotEmpty(roles) || roles.includes(req?.payload?.role)){
+      let hasRole = sufficientRoles(roles,req?.payload?.roles)
+      if(!arrayNotEmpty(roles) || hasRole){
         return true
       }
       return false
     }
   });
   schema = applyMiddleware(schema, middleware);
+  const app = express();
+  
+  const corsOptions:CorsOptions = {credentials: true, origin: 'https://studio.apollographql.com'}
   const server = new ApolloServer({
     formatError: (error) => {
       return {
@@ -58,9 +64,6 @@ async function startApolloServer() {
     ]
   });
   await server.start();
-
-  const app = express();
-  const corsOptions:CorsOptions = {credentials: true, origin: 'https://studio.apollographql.com'}
   app.use(cors(corsOptions));
   app.use(cookieParser())
   app.use('/graphql',async (req,res,next)=>{
@@ -68,6 +71,12 @@ async function startApolloServer() {
     await verifyToken({req,res},token)
     req.quickStore = quickStore({req,res})
     req.actions = Actions({req,res})
+    const newSchema = wrapSchema({
+      schema,
+      transforms: [new FilterSchema(req),new PruneSchema()],
+    });
+    const schemaDerivedData = await (server as any).generateSchemaDerivedData(newSchema) as any
+    (server as any).state.schemaManager.schemaDerivedData = schemaDerivedData
     next()
   })
   server.applyMiddleware({ app,cors:false });
