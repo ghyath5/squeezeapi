@@ -16,15 +16,15 @@ generator typegraphql {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  firstName    String
-  lastName     String
-  email        String?  @unique
-  phone_number String   @unique
-  // phoneNumberConfirmedAt DateTime?
-  role         Role     @default(USER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now()) @updatedAt
+  id               String    @id @default(uuid())
+  firstName        String
+  lastName         String
+  email            String?   @unique
+  phone_number     String    @unique
+  loginConfirmedAt DateTime?
+  role             Role      @default(USER)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @default(now()) @updatedAt
 }
 
 model Service {
@@ -36,24 +36,20 @@ model Service {
 }
 
 model Attribute {
-  id             Int       @id @default(autoincrement())
-  name           String    @unique
-  name_ar        String    @unique
+  id             Int            @id @default(autoincrement())
+  name           String         @unique
+  name_ar        String         @unique
   description    String?
   description_ar String?
   services       Service[]
-  createdAt      DateTime  @default(now())
+  type           AttributeTypes @default(INPUT)
+  createdAt      DateTime       @default(now())
 }
 
-// model ServicesAttributes {
-//   attribute   Attribute @relation(fields: [attributeId], references: [id])
-//   attributeId Int
-//   service     Service   @relation(fields: [serviceId], references: [id])
-//   serviceId   Int
-//   assignedAt  DateTime  @default(now())
-
-//   @@id([serviceId, attributeId])
-// }
+enum AttributeTypes {
+  INPUT
+  CARMODELS
+}
 
 enum Role {
   USER
