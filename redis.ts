@@ -24,6 +24,10 @@ export const quickStore = (ctx?:any)=>{
                 })
             })
         },
+        inc:(key):void=>{
+            key = `${prefix}${key}`
+            client.incr(key)
+        },
         setTable:(uid?:string|undefined,...data: any):Boolean=>{
             if(!userId && !uid)return false;
             let uuid = userId || uid
