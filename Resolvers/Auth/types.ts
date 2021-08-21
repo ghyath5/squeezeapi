@@ -1,7 +1,17 @@
 import {  IsEmail } from "class-validator";
-import { Field, InputType, ObjectType } from "type-graphql";
-import {User} from '../../prisma/generated/typegraphql'
+import { Extensions, Field, InputType, ObjectType } from "type-graphql";
+import { sufficientRoles } from "../../utils/auth";
 
+@ObjectType()
+class CommonAuthResponse {
+  @Field(()=>String,{nullable:true})
+  message?:string
+  
+  @Field(()=>Boolean)
+  isSuccess:Boolean
+}
+
+@Extensions({check:(isLoggedIn,roles)=>!isLoggedIn})
 @InputType()
 export class RegisterInputData {
   @Field()
@@ -18,24 +28,18 @@ export class RegisterInputData {
   lastName:string
 }
 
-//login input data
+@Extensions({check:(isLoggedIn,roles)=>!isLoggedIn})
 @InputType()
 export class LoginInputData {
   @Field()
   phone_number:string  
 }
 
+@Extensions({check:(isLoggedIn,roles)=>!isLoggedIn})
 @ObjectType()
-export class AuthResponse{
-    @Field(()=>User,{nullable:true})
-    user?:User
+export class AuthResponse extends CommonAuthResponse{}
 
-    @Field(()=>Boolean,{nullable:true})
-    isConfirmed?:Boolean
-
-    @Field(()=>String,{nullable:true})
-    message?:string
-
-    @Field(()=>Boolean)
-    isSuccess:Boolean
+@Extensions({check:(isLoggedIn,roles)=>sufficientRoles(['UNCONFIRMED'],roles)})
+@ObjectType()
+export class VerifyLoginResponse extends CommonAuthResponse{
 }
