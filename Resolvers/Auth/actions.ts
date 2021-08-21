@@ -11,11 +11,11 @@ const Actions = (ctx:ExpressContext)=>{
     return {
         sendLoginCode:async (userId: string)=>{
             const code = generateCode(6)
-            store.setTable(userId,`phone_number_verification_code`,code)
+            store.set(`phone_number_verification_code:${userId}`,code,60*5)
         },
-        sendTokens:({role,userId}:{role:string,userId:string})=>{
-            let token = generateToken({userId,role},`${config.tokenExpiration}s`)            
-            let refreshToken = generateToken({userId,role},`${config.refreshTokenExpiration}s`)
+        sendTokens:({roles,userId}:{roles:string[],userId:string})=>{
+            let token = generateToken({userId,roles},`${config.tokenExpiration}s`)            
+            let refreshToken = generateToken({userId},`${config.refreshTokenExpiration}s`)
             ctx.res.cookie('authorization',`${token}`,{httpOnly:true,sameSite:'none',secure:true})
             ctx.res.cookie('x-refresh-token',refreshToken,{httpOnly:true,sameSite:'none',secure:true})
         },
