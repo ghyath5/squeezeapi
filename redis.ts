@@ -15,11 +15,11 @@ export const quickStore = (ctx?:any)=>{
             client.set(key,value)
             client.expire(key,expires)
         },
-        get:async(key:string)=>{
+        get:async(key:string):Promise<string>=>{
             key = `${prefix}${key}`
             return await new Promise((r)=>{
                 client.get(key,(err,reply)=>{
-                    if(err||!reply)return r(false)
+                    if(err||!reply)return r("")
                     return r(reply)
                 })
             })
@@ -37,7 +37,7 @@ export const quickStore = (ctx?:any)=>{
             let key = `${prefix}${uuid}`
             return await new Promise((r)=>{
                 client.hget(key,field,(e,reply)=>{
-                    if(e||!reply)return r(false)
+                    if(e||!reply)return r("")
                     return r(reply)
                 })
             })
