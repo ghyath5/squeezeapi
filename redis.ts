@@ -15,6 +15,15 @@ export const quickStore = (ctx?:any)=>{
             client.set(key,value)
             client.expire(key,expires)
         },
+        get:async(key:string)=>{
+            key = `${prefix}${key}`
+            return await new Promise((r)=>{
+                client.get(key,(err,reply)=>{
+                    if(err||!reply)return r(false)
+                    return r(reply)
+                })
+            })
+        },
         setTable:(uid?:string|undefined,...data: any):Boolean=>{
             if(!userId && !uid)return false;
             let uuid = userId || uid
