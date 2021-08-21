@@ -39,6 +39,7 @@ export class Queries extends UpdateUserResolver{
 
 @Resolver()
 export class Mutations {
+  @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&!sufficientRoles(['UNCONFIRMED'],roles)})
   @Authorized(Role.USER)
   @Mutation(()=>ChangeNumberResponse)
   async updatePhoneNumber(
@@ -60,6 +61,7 @@ export class Mutations {
     };
   }
 
+  @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&!sufficientRoles(['UNCONFIRMED'],roles)})
   @Authorized(Role.USER)
   @Mutation(()=>User)
   async verifyPhoneNumberChange(
