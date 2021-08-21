@@ -11,7 +11,6 @@ class CommonAuthResponse {
   isSuccess:Boolean
 }
 
-@Extensions({check:(isLoggedIn,roles)=>!isLoggedIn})
 @InputType()
 export class RegisterInputData {
   @Field({nullable:true})
@@ -27,18 +26,16 @@ export class RegisterInputData {
   lastName:string
 }
 
-@Extensions({check:(isLoggedIn,roles)=>!isLoggedIn})
 @InputType()
 export class LoginInputData {
   @Field()
   phoneNumber:string  
 }
 
-@Extensions({check:(isLoggedIn,roles)=>!isLoggedIn})
 @ObjectType()
 export class AuthResponse extends CommonAuthResponse{}
 
-@Extensions({check:(isLoggedIn,roles)=>sufficientRoles(['UNCONFIRMED'],roles)})
+
 @ObjectType()
 export class VerifyLoginResponse extends CommonAuthResponse{
 }
