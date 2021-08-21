@@ -27,9 +27,7 @@ export default function RateLimit({window, max, errorMessage}:{window:number,max
         }else {
           quickStore.inc(key)
         }
-      }else{
-        console.log(window);
-        
+      }else{        
         quickStore.set(key, "1", window);
       }
       return next();
