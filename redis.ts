@@ -24,7 +24,7 @@ export const quickStore = (ctx?:ExpressContext)=>{
                 })
             })
         },
-        inc:(key):void=>{
+        inc:(key: string):void=>{
             key = `${prefix}${key}`
             client.incr(key)
         },
