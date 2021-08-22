@@ -7,7 +7,7 @@ client.on("error", function(error) {
 });
 const prefix = 'squeeze:'
 
-export const quickStore = (ctx?:any)=>{
+export const quickStore = (ctx?:ExpressContext)=>{
     let userId = ctx?.req?.payload?.userId
     return {
         set:async (key: string,value: string,expires: number)=>{
