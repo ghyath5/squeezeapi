@@ -3,7 +3,7 @@ import { ExpressContext } from 'apollo-server-express';
 import {  Arg, Authorized, Ctx, Extensions, Mutation, Resolver} from 'type-graphql'
 import { Context } from '../../@types/types';
 import { sufficientRoles } from '../../utils/auth';
-import { Guest } from '../CustomDecorators';
+import {RateLimit, Guest } from '../CustomDecorators';
 import {  AuthResponse, LoginInputData, RegisterInputData, VerifyLoginResponse } from './types';
 
 
@@ -111,7 +111,8 @@ export class Auth {
     }
   }
 
-  @Extensions({check:(isLoggedIn,roles)=>sufficientRoles(['UNCONFIRMED'],roles)})
+  @RateLimit({window:30,max:1,errorMessage:'wait 30 seconds'})
+  @Extensions({check:(isLoggedIn,roles:string[])=>sufficientRoles(['UNCONFIRMED'],roles)})
   @Authorized("UNCONFIRMED")
   @Mutation(()=>VerifyLoginResponse)
   async resendOTP(
