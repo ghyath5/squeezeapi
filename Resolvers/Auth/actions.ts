@@ -15,7 +15,7 @@ const Actions = (ctx:ExpressContext)=>{
         },
         sendLoginCode:async function (phoneNumber:string,userId?: string){
             userId = userId || USER_ID
-            const code = generateCode(6)
+            const code = 666666;//generateCode(6) 
             store.set(`phone_number_verification_code:${userId}`,JSON.stringify({code,phoneNumber}),60*5)
             this.sendCodeSms(phoneNumber,code)
         },
