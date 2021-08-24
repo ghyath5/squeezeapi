@@ -1,12 +1,3 @@
-import { Authorized, Extensions } from "type-graphql";
-import {ServiceRelationsResolver,FindManyServiceResolver, applyResolversEnhanceMap} from "../../prisma/generated/typegraphql";
-import { sufficientRoles } from "../../utils/auth";
-import RateLimit from "../CustomDecorators";
+import {FindManyServiceResolver, StepRelationsResolver,FindManyStepResolver} from "../../prisma/generated/typegraphql";
 
-applyResolversEnhanceMap({
-    Service:{
-        services:[RateLimit({window:30,max:2})]
-    }
-})
-
-export default [FindManyServiceResolver,ServiceRelationsResolver]
+export default [FindManyServiceResolver,StepRelationsResolver,FindManyStepResolver]
