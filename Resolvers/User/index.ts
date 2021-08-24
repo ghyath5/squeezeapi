@@ -1,33 +1,19 @@
 import { PrismaClient } from "@prisma/client";
 import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
-import {  Arg, Authorized, Ctx, Extensions, Mutation, NonEmptyArray, Query, Resolver, UseMiddleware } from "type-graphql";
+import {  Arg, Authorized, Ctx, Extensions, Mutation, NonEmptyArray, Query, Resolver } from "type-graphql";
 import { Context } from "../../@types/types";
-import { AuthorizeSelf } from "../../middlewares";
-import { Role, User,UpdateUserResolver,applyResolversEnhanceMap, applyInputTypesEnhanceMap, applyModelsEnhanceMap } from "../../prisma/generated/typegraphql";
+import { Role, User,UpdateUserResolver} from "../../prisma/generated/typegraphql";
 import { sufficientRoles } from "../../utils/auth";
-import { applyDecoratorsFields } from "../../utils/helpers";
+import { RateLimit } from "../CustomDecorators";
 import { ChangeNumberResponse, UpdatePhoneNumberInput } from "./types";
-const ACCESS_FIELDS_ROLES = ['ADMIN','MANAGER']
 
-applyResolversEnhanceMap({
-  User:{
-    updateUser:[Authorized(['USER',...ACCESS_FIELDS_ROLES]),UseMiddleware(AuthorizeSelf),Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&!sufficientRoles(['UNCONFIRMED'],roles)})]
-  }
-})
-
-const hiddenInputFields = applyDecoratorsFields(['phoneNumber','loginConfirmedAt','updatedAt','createdAt','role','id'],Extensions({hide:true}))
-applyInputTypesEnhanceMap({
-  UserUpdateInput:{
-    fields:hiddenInputFields
-  }
-})
 
 @Resolver()
 export class Queries extends UpdateUserResolver{
-  @Query(()=>String)
-  root():String{
-    return 'Root';
-  }
+  // @Query(()=>String)
+  // root():String{
+  //   return 'Root';
+  // }
   @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&!sufficientRoles(['UNCONFIRMED'],roles)})
   @Authorized(Role.USER)
   @Query(()=>User)
@@ -39,6 +25,7 @@ export class Queries extends UpdateUserResolver{
 
 @Resolver()
 export class Mutations {
+  @RateLimit({window:30,max:1,errorMessage:'wait 30 seconds'})
   @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&!sufficientRoles(['UNCONFIRMED'],roles)})
   @Authorized(Role.USER)
   @Mutation(()=>ChangeNumberResponse)
