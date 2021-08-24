@@ -1,4 +1,4 @@
-import { createMethodDecorator, ResolverData, UseMiddleware } from "type-graphql";
+import { createMethodDecorator, UseMiddleware } from "type-graphql";
 import { Context } from "../@types/types";
 export function Guest() {
     return createMethodDecorator(async ({context}:{context:Context}, next) => {
@@ -8,8 +8,7 @@ export function Guest() {
       return next();
     });
 }
-export default function RateLimit({window, max, errorMessage}:{window:number,max:number,errorMessage?:string}) {
-
+export function RateLimit({window, max, errorMessage}:{window:number,max:number,errorMessage?:string}) {
   return UseMiddleware(async ({ info:{variableValues, fieldName} , context}: {context:Context,info:any}, next) => {
       let visitorKey = context.userId ? "user:"+context.userId: "ip:"+context?.ctx?.req?.ip;
       const quickStore = context.ctx.req.quickStore
@@ -22,7 +21,7 @@ export default function RateLimit({window, max, errorMessage}:{window:number,max
       
       const oldRecord = await quickStore.get(key)
       if(oldRecord) {
-        if(parseInt(oldRecord) > max){
+        if(parseInt(oldRecord) >= max){
             throw new Error(errorMessage || 'Rate Limit Exceeded')
         }else {
           quickStore.inc(key)
