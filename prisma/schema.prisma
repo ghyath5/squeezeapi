@@ -22,39 +22,96 @@ model User {
   email            String?   @unique
   phoneNumber      String    @unique
   loginConfirmedAt DateTime?
+  points           Int       @default(0)
+  orders           Order[]
+  addresses        Address[]
   role             Role      @default(USER)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @default(now()) @updatedAt
 }
 
-model Service {
-  id         Int         @id @default(autoincrement())
-  name       String      @unique
-  name_ar    String      @unique
-  attributes Attribute[]
-  createdAt  DateTime    @default(now())
+model Order {
+  id        String      @id @default(uuid())
+  status    OrderStatus
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
+  address   Address     @relation(fields: [addressId], references: [id])
+  addressId Int
+
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId Int
+
+  details Json @default("{}")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
-model Attribute {
+model Address {
+  id           Int      @id @default(autoincrement())
+  city         String
+  area         String
+  place        String
+  placeNumber  String
+  phoneNumber  String
+  buildingName String
+  primary      Boolean
+  orders       Order[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  User         User     @relation(fields: [userId], references: [id])
+  userId       String
+}
+
+model Service {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  name_ar   String   @unique
+  steps     Step[]
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+model Step {
+  id       Int          @id @default(autoincrement())
+  name     String?      @unique
+  index    Int          @default(1)
+  services Service[]
+  options  StepOption[]
+}
+
+model StepOption {
   id             Int            @id @default(autoincrement())
   name           String         @unique
   name_ar        String         @unique
   description    String?
   description_ar String?
-  services       Service[]
-  type           AttributeTypes @default(INPUT)
-  createdAt      DateTime       @default(now())
+  index          Int            @default(autoincrement())
+  type           StepOptionType @default(SIMPLE_OPTIONS_SELECT)
+  settings       Json           @default("{}")
+  Step           Step           @relation(fields: [stepId], references: [id])
+  stepId         Int
 }
 
-enum AttributeTypes {
+enum StepOptionType {
+  ICONIC_OPTIONS_SELECT
+  ICONIC_SCROLLING_SELECT
+  SIMPLE_OPTIONS_SELECT
+  NUMBER_SELECT
+  DATE_SELECT
   INPUT
-  CARMODELS
+  TEXTAREA
   PAYMENT_METHOD
-
+  ADDRESS_MODEL
 }
 
 enum Role {
   USER
   MANAGER
   ADMIN
+}
+
+enum OrderStatus {
+  Completed
+  In_progress  @map("In Progress")
 }
