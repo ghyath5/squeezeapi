@@ -16,7 +16,7 @@ applyResolversEnhanceMap({
       Authorized(["USER", ...ACCESS_FIELDS_ROLES]),
       UseMiddleware(AuthorizeSelf),
       Extensions({
-        check: (isLoggedIn, roles) =>
+        check: (isLoggedIn: Boolean, roles: string[]) =>
           isLoggedIn && !sufficientRoles(["UNCONFIRMED"], roles),
       }),
     ],
