@@ -2,18 +2,14 @@ import { PrismaClient } from "@prisma/client";
 import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
 import {  Arg, Authorized, Ctx, Extensions, Mutation, NonEmptyArray, Query, Resolver } from "type-graphql";
 import { Context } from "../../@types/types";
-import { Role, User,UpdateUserResolver} from "../../prisma/generated/typegraphql";
+import { Role, User,UpdateUserResolver,UserRelationsResolver} from "../../prisma/generated/typegraphql";
 import { sufficientRoles } from "../../utils/auth";
 import { RateLimit } from "../CustomDecorators";
 import { ChangeNumberResponse, UpdatePhoneNumberInput } from "./types";
 
 
 @Resolver()
-export class Queries extends UpdateUserResolver{
-  // @Query(()=>String)
-  // root():String{
-  //   return 'Root';
-  // }
+export class Queries extends UserRelationsResolver{
   @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&!sufficientRoles(['UNCONFIRMED'],roles)})
   @Authorized(Role.USER)
   @Query(()=>User)
@@ -24,7 +20,7 @@ export class Queries extends UpdateUserResolver{
 }
 
 @Resolver()
-export class Mutations {
+export class Mutations extends UpdateUserResolver{
   @RateLimit({window:30,max:1,errorMessage:'wait 30 seconds'})
   @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&!sufficientRoles(['UNCONFIRMED'],roles)})
   @Authorized(Role.USER)

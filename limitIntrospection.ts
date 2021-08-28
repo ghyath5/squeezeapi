@@ -1,7 +1,7 @@
 import { filterSchema,  } from '@graphql-tools/utils';
 import { Request } from 'express-serve-static-core';
 import { GraphQLSchema } from 'graphql';
-
+const inputFieldsToRemove = ['updatedAt','createdAt','id']
 export class FilterSchema {
     req: Request;
     constructor(req:Request){
@@ -12,10 +12,6 @@ export class FilterSchema {
         const fieldExtensions = fieldConfig?.extensions
         const isLoggedIn = this.req?.payload
         const roles = this.req?.payload?.roles
-        if(typeExtensions?.hide || fieldExtensions?.hide){
-            return false;
-        }
-        
         if(typeExtensions?.check){
             return typeExtensions?.check(isLoggedIn,roles)
         }
@@ -23,6 +19,9 @@ export class FilterSchema {
             return fieldExtensions?.check(isLoggedIn,roles)
         }
         
+        if(typeExtensions?.hide || fieldExtensions?.hide){
+            return false;
+        }
         return true;
     }
     transformSchema(originalWrappingSchema:GraphQLSchema) {

@@ -3,7 +3,7 @@ import { ExpressContext } from "apollo-server-express";
 import { StoreType } from "../../redis";
 import { generateCode, generateToken } from "../../utils/auth";
 const config = {
-    tokenExpiration:10*60, //seconds
+    tokenExpiration:5*60, //seconds
     refreshTokenExpiration:7*24*60*60 //seconds
 }
 const Actions = (ctx:ExpressContext)=>{

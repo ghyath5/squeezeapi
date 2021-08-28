@@ -1,3 +1,3 @@
-import {FindManyServiceResolver, StepRelationsResolver,FindManyStepResolver} from "../../prisma/generated/typegraphql";
+import {FindManyServiceResolver, StepRelationsResolver,FindManyStepResolver, StepOptionRelationsResolver} from "../../prisma/generated/typegraphql";
 
-export default [FindManyServiceResolver,StepRelationsResolver,FindManyStepResolver]
+export default [FindManyServiceResolver,StepRelationsResolver,FindManyStepResolver,StepOptionRelationsResolver]
