@@ -98,8 +98,8 @@ model StepOption {
   step           Step            @relation(fields: [stepId], references: [id])
   stepId         Int
   children       StepOption[]    @relation("StepOptionToStepOption")
-  parent         StepOption?     @relation("StepOptionToStepOption", fields: [stepOptionId], references: [id])
-  stepOptionId   Int?
+  parent         StepOption?     @relation("StepOptionToStepOption", fields: [parentId], references: [id])
+  parentId       Int?
 }
 
 enum StepOptionType {
