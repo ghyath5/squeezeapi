@@ -1,52 +1,41 @@
-import {  IsEmail, IsPhoneNumber, MinLength } from "class-validator";
-import { Field, InputType, ObjectType } from "type-graphql";
-import {User} from '@generated/type-graphql'
+import {  IsEmail } from "class-validator";
+import { Extensions, Field, InputType, ObjectType } from "type-graphql";
+import { sufficientRoles } from "../../utils/auth";
+
+@ObjectType()
+class CommonAuthResponse {
+  @Field(()=>String,{nullable:true})
+  message?:string
+  
+  @Field(()=>Boolean)
+  isSuccess:Boolean
+}
 
 @InputType()
 export class RegisterInputData {
-  @Field()
-  @IsEmail({})
-  email:string
+  @Field({nullable:true})
+  email?:string
 
   @Field()
-  phone_number:string
+  phoneNumber:string
 
   @Field()
-  @MinLength(2)
-  name:string
+  firstName:string
 
   @Field()
-  @MinLength(6)
-  password:string
+  lastName:string
 }
 
-//login input data
 @InputType()
 export class LoginInputData {
-  @Field({nullable:true})
-  @IsEmail({})
-  email:string
-
-  @Field({nullable:true})
-  phone_number:string
-
   @Field()
-  @MinLength(6)
-  password:string
-  
+  phoneNumber:string  
 }
 
 @ObjectType()
-export class AuthResponse{
-    @Field(()=>User,{nullable:true})
-    user?:User
+export class AuthResponse extends CommonAuthResponse{}
 
-    @Field(()=>Boolean,{nullable:true})
-    isConfirmed?:Boolean
 
-    @Field(()=>String,{nullable:true})
-    message?:string
-
-    @Field(()=>Boolean)
-    isSuccess:Boolean
+@ObjectType()
+export class VerifyLoginResponse extends CommonAuthResponse{
 }

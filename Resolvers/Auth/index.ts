@@ -1,96 +1,142 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import { ExpressContext } from 'apollo-server-express';
-import {  Arg, Ctx, Mutation, Query, Resolver} from 'type-graphql'
-import {  storeType } from '../../redis';
-import { compareHashedPassword, hashPassword, sendTokens } from '../../utils/auth';
-import { sendSmsCode } from './actions';
-import {  AuthResponse, LoginInputData, RegisterInputData } from './types';
+import {  Arg, Authorized, Ctx, Extensions, Mutation, Resolver} from 'type-graphql'
+import { Context } from '../../@types/types';
+import { sufficientRoles } from '../../utils/auth';
+import {RateLimit, Guest } from '../CustomDecorators';
+import {  AuthResponse, LoginInputData, RegisterInputData, VerifyLoginResponse } from './types';
 
 
 @Resolver()
 export class Auth {
-
-
+  @Extensions({check:(isLoggedIn,roles)=>!isLoggedIn})
+  @Guest()
   @Mutation(()=>AuthResponse)
   async register(
     @Arg("RegisterInputData") data:RegisterInputData,
-    @Ctx() {prisma,ctx,quickStore}:{prisma:PrismaClient,ctx:ExpressContext,quickStore:storeType}
+    @Ctx() {prisma,ctx}:{prisma:PrismaClient,ctx:ExpressContext}
   ): Promise<AuthResponse> {
     let user = await prisma.user.findFirst({
       where:{
         OR:[
-          {email:{equals:data.email}},
-          {phone_number:{equals:data.phone_number}}
+          ...[data.email?{email:{equals:data.email}}:{}],
+          {phoneNumber:{equals:data.phoneNumber}}
         ]
       }
     })
     if(user){
-      return {
-        message:data.email==user.email?'email already in use':'phone number already in use',
-        isSuccess:false
-      }
+      throw new Error(data.phoneNumber==user.phoneNumber?'phone number already in use':'email already in use')
     }
-    data.password = hashPassword(data.password)
+    // data.password = hashPassword(data.password)
     user = await prisma.user.create({data})
-    sendTokens({
+    ctx?.req?.actions?.sendTokens({
       userId:user.id,
-      role:Role.USER,
-    },ctx);
-    if(!user.phoneNumberConfirmedAt){
+      roles:['UNCONFIRMED'],
+    });
+    // if(!user.phoneNumberConfirmedAt){
       // send verification code
-      sendSmsCode(user)
-    }
+    ctx.req.actions?.sendLoginCode(user.phoneNumber,user.id)
+    // }
     return {
-      message:'Success',
-      isSuccess:true,
-      user,
-      isConfirmed:Boolean(user.phoneNumberConfirmedAt)
+      message:'Code sent',
+      isSuccess:true
     }
   }
 
-
+  @Extensions({check:(isLoggedIn,roles)=>!isLoggedIn})
+  @Guest()
   @Mutation(()=>AuthResponse)
   async login(
     @Arg("LoginInputData") data:LoginInputData,
-    @Ctx() {prisma,ctx,quickStore}:{prisma:PrismaClient,ctx:ExpressContext,quickStore:storeType}
+    @Ctx() {prisma,ctx}:Context
   ):Promise<AuthResponse>{
-    const {email,password,phone_number} = data
-    const login = email || phone_number
+    const {phoneNumber} = data
+    const login = phoneNumber
+    if(!phoneNumber) {
+      throw new Error("No user found")
+    }
     const user = await prisma.user.findFirst({
+      where:{phoneNumber:{equals:login}}
+    })
+    if(!user){
+      throw new Error("No user found")
+    }   
+    ctx?.req?.actions?.sendTokens({
+      userId:user.id,
+      roles:['UNCONFIRMED'],
+    });
+    // if(!user.phoneNumberConfirmedAt){
+      // send verification code
+    ctx.req.actions?.sendLoginCode(user.phoneNumber,user.id)
+    // }
+    return {
+      message:'Code sent',
+      isSuccess:true
+    }    
+  }
+  
+  @Extensions({check:(isLoggedIn,roles)=>sufficientRoles(['UNCONFIRMED'],roles)})
+  @Authorized("UNCONFIRMED")
+  @Mutation(()=>VerifyLoginResponse)
+  async verifyOTP(
+    @Arg("OTPcode") code:string,
+    @Ctx() {prisma,ctx,userId}:Context
+  ):Promise<VerifyLoginResponse>{
+    let storedCode = await ctx?.req?.quickStore.get(`phone_number_verification_code:${userId}`)
+    if(!storedCode)throw new Error("Incorrect code")
+
+    const payloadCode = JSON.parse(storedCode)
+    
+    if(!payloadCode.code || payloadCode.code !== code || !code){
+      throw new Error("Incorrect code")
+    }
+    prisma.user.update({
       where:{
-        OR:[
-          {email:{equals:login}},
-          {phone_number:{equals:login}}
-        ]
+        id:userId
+      },
+      data:{
+        loginConfirmedAt:{
+          set:new Date()
+        }
       }
     })
-    if(!user?.password) {
-      return {
-        message:'no user found',
-        isSuccess:false,
-      }
-    }
-    let isPasswordCorrect = compareHashedPassword(password,user.password)
-    if(!isPasswordCorrect){
-      return {
-        message:'incorrect password',
-        isSuccess:false
-      }
-    }
-    sendTokens({
-      userId:user.id,
-      role:Role.USER,
-    },ctx);
-    if(!user.phoneNumberConfirmedAt){
-      // send verification code
-      sendSmsCode(user)
-    }
+    ctx?.req?.actions?.sendTokens({
+      roles:['USER'],
+      userId
+    })
+    // let user = await prisma.user.findUnique({where:{id:ctx?.req?.payload?.userId}}) as User
     return {
       message:'Success',
-      isSuccess:true,
-      user,
-      isConfirmed:Boolean(user.phoneNumberConfirmedAt)
+      isSuccess:true
     }
-    
+  }
+
+  @RateLimit({window:30,max:1,errorMessage:'wait 30 seconds'})
+  @Extensions({check:(isLoggedIn,roles:string[])=>sufficientRoles(['UNCONFIRMED'],roles)})
+  @Authorized("UNCONFIRMED")
+  @Mutation(()=>VerifyLoginResponse)
+  async resendOTP(
+    @Ctx() {prisma,ctx,userId}:Context
+  ):Promise<VerifyLoginResponse>{
+    const user = await prisma.user.findUnique({
+      where:{id:userId}
+    })
+    if(!user){
+      ctx.req?.actions?.destoryTokens()
+      throw new Error("User not found")
+    }
+    ctx.req.actions?.sendLoginCode(user.phoneNumber)
+    return {
+      message:'Code sent',
+      isSuccess:true
+    }
+  }
+
+  @Extensions({check:(isLoggedIn,roles)=>Boolean(isLoggedIn)})
+  @Authorized()
+  @Mutation(()=>Boolean)
+  logout(@Ctx() {ctx}:{ctx:ExpressContext}):Boolean{
+    ctx.req.actions.destoryTokens()
+    return true
   }
 }

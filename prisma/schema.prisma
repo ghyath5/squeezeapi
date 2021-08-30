@@ -3,7 +3,7 @@
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("PG_DATABASE_URL")
 }
 
 generator client {
@@ -12,51 +12,112 @@ generator client {
 
 generator typegraphql {
   provider = "typegraphql-prisma"
+  output   = "./generated/typegraphql"
 }
 
 model User {
-  id                     String    @id @default(uuid())
-  name                   String
-  email                  String?   @unique
-  phone_number           String?   @unique
-  /// @TypeGraphQL.omit(output: true)
-  password               String?
-  phoneNumberConfirmedAt DateTime?
-  role                   Role      @default(USER)
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @default(now()) @updatedAt
+  id               String    @id @default(uuid())
+  firstName        String
+  lastName         String
+  email            String?   @unique
+  phoneNumber      String    @unique
+  loginConfirmedAt DateTime?
+  points           Int       @default(0)
+  orders           Order[]
+  addresses        Address[]
+  role             Role      @default(USER)
+  /// @TypeGraphQL.omit(input: true)
+  createdAt        DateTime  @default(now())
+  /// @TypeGraphQL.omit(input: true)
+  updatedAt        DateTime  @default(now()) @updatedAt
+}
+
+model Order {
+  id        String      @id @default(uuid())
+  status    OrderStatus
+  user      User        @relation(fields: [userId], references: [id])
+  userId    String
+  address   Address     @relation(fields: [addressId], references: [id])
+  addressId Int
+
+  service   Service @relation(fields: [serviceId], references: [id])
+  serviceId Int
+
+  details   Json     @default("{}")
+  /// @TypeGraphQL.omit(input: true)
+  createdAt DateTime @default(now())
+  /// @TypeGraphQL.omit(input: true)
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Address {
+  id           Int      @id @default(autoincrement())
+  city         String
+  area         String
+  place        String
+  placeNumber  String
+  phoneNumber  String
+  buildingName String
+  primary      Boolean
+  orders       Order[]
+  User         User     @relation(fields: [userId], references: [id])
+  userId       String
+  /// @TypeGraphQL.omit(input: true)
+  createdAt    DateTime @default(now())
+  /// @TypeGraphQL.omit(input: true)
+  updatedAt    DateTime @default(now()) @updatedAt
 }
 
 model Service {
-  id         Int         @id @default(autoincrement())
-  name       String      @unique
-  name_ar    String      @unique
-  attributes Attribute[]
-  createdAt  DateTime    @default(now())
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  name_ar   String   @unique
+  steps     Step[]
+  orders    Order[]
+  /// @TypeGraphQL.omit(input: true)
+  createdAt DateTime @default(now())
 }
 
-model Attribute {
-  id             Int       @id @default(autoincrement())
-  name           String    @unique
-  name_ar        String    @unique
+model Step {
+  id       Int          @id @default(autoincrement())
+  name     String?      @unique
+  index    Int          @default(1)
+  services Service[]
+  options  StepOption[]
+}
+
+model StepOption {
+  id             Int             @id @default(autoincrement())
+  name           String          @unique
+  name_ar        String          @unique
   description    String?
   description_ar String?
-  services       Service[]
-  createdAt      DateTime  @default(now())
+  index          Int             @default(autoincrement())
+  type           StepOptionType? @default(SIMPLE_SELECT)
+  settings       Json            @default("{}")
+  step           Step            @relation(fields: [stepId], references: [id])
+  stepId         Int
+  children       StepOption[]    @relation("StepOptionToStepOption")
+  parent         StepOption?     @relation("StepOptionToStepOption", fields: [parentId], references: [id])
+  parentId       Int?
 }
 
-// model ServicesAttributes {
-//   attribute   Attribute @relation(fields: [attributeId], references: [id])
-//   attributeId Int
-//   service     Service   @relation(fields: [serviceId], references: [id])
-//   serviceId   Int
-//   assignedAt  DateTime  @default(now())
-
-//   @@id([serviceId, attributeId])
-// }
+enum StepOptionType {
+  ICONIC_SELECT
+  SIMPLE_SELECT
+  INPUT
+  TEXTAREA
+  PAYMENT_METHOD
+  ADDRESS_MODEL
+}
 
 enum Role {
   USER
   MANAGER
   ADMIN
+}
+
+enum OrderStatus {
+  Completed
+  In_progress  @map("In Progress")
 }
