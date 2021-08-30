@@ -15,6 +15,6 @@ COPY . .
 EXPOSE 4000
 
 RUN yarn build
-RUN yarn generate
+RUN yarn postinstall
 # the command that starts our app
 CMD ["yarn", "start"]
