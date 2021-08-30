@@ -26,7 +26,7 @@ enhanceResolvers(
   [
     Authorized(["USER", ...ACCESS_FIELDS_ROLES]),
     UseMiddleware(AuthorizeSelf()),
-    showFieldsOnlyFor(ACCESS_FIELDS_ROLES)
+    showFieldsOnlyFor(['USER',...ACCESS_FIELDS_ROLES])
   ]
 )
 enhanceRelationResolvers(
