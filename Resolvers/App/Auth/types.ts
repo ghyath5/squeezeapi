@@ -1,6 +1,6 @@
 import {  IsEmail } from "class-validator";
 import { Extensions, Field, InputType, ObjectType } from "type-graphql";
-import { sufficientRoles } from "../../utils/auth";
+import { sufficientRoles } from "../../../utils/auth";
 
 @ObjectType()
 class CommonAuthResponse {
