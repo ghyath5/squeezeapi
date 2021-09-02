@@ -37,8 +37,8 @@ export class Auth {
     }
     let refreshToken = generateToken({userId:user.id},`7d`)
     let token = generateToken({userId:user.id,roles:[user.role]},`5m`)
-    ctx.res.cookie('authorization',`${token}`,{httpOnly:true,sameSite:'none',secure:true})
-    ctx.res.cookie('x-refresh-token',refreshToken,{httpOnly:true,sameSite:'none',secure:true})
+    ctx.res.cookie('authorization',`${token}`,{httpOnly:true})
+    ctx.res.cookie('x-refresh-token',refreshToken,{httpOnly:true})
     return {
       message:'Success',
       isSuccess:true
