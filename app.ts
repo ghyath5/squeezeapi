@@ -6,7 +6,6 @@ import cors, { CorsOptions } from "cors";
 import {  ApolloServerPluginLandingPageLocalDefault, ApolloServerPluginLandingPageProductionDefault } from 'apollo-server-core';
 import {buildSchema} from 'type-graphql'
 import resolvers from './Resolvers'
-// import jwt from "jsonwebtoken";
 import { arrayNotEmpty } from "class-validator";
 import { applyMiddleware } from 'graphql-middleware';
 import {  PrismaSelect } from '@paljs/plugins';
@@ -15,7 +14,7 @@ import { quickStore } from "./redis";
 import cookieParser from 'cookie-parser'
 import { sufficientRoles, verifyToken } from "./utils/auth";
 import { Context } from "./@types/types";
-import Actions from "./Resolvers/Auth/actions";
+import Actions from "./Resolvers/App/Auth/actions";
 import { PruneSchema, wrapSchema } from '@graphql-tools/wrap';
 import { FilterSchema } from "./limitIntrospection";
 import { fieldExtensionsEstimator, getComplexity, simpleEstimator } from "graphql-query-complexity";
