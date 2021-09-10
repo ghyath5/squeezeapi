@@ -44,7 +44,7 @@ export const enhanceInputTypes = (fields:string[],value:any)=>{
 
 export const enhanceResolvers = (fields:string[],value:any)=>{
     let objects = ExpandObject(fields,value)
-    objects.map((object)=>{        
+    objects.map((object)=>{
         applyResolversEnhanceMap(object)
     })
 }
@@ -53,5 +53,28 @@ export const enhanceRelationResolvers = (fields:string[],value:any)=>{
     let objects = ExpandObject(fields,value)
     objects.map((object)=>{        
         applyRelationResolversEnhanceMap(object)
+    })
+}
+
+export const enhanceInputOnlyConnect = (inputsTypes:string[])=>{
+    inputsTypes.map((input)=>{
+        applyInputTypesEnhanceMap({
+            [input]:{
+                fields:{
+                    create:[Extensions({hide:true})],
+                    connectOrCreate:[Extensions({hide:true})]
+                }
+            }
+        })
+    })    
+}
+
+export const enhanceHideInputClass = (inputClass:string[])=>{
+    inputClass.map((input)=>{
+        applyInputTypesEnhanceMap({
+            [input]:{
+                class:[Extensions({hide:true})]
+            }
+        })
     })
 }
