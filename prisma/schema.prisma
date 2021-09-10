@@ -20,6 +20,8 @@ model User {
   firstName        String
   lastName         String
   email            String?   @unique
+  /// @TypeGraphQL.omit(output: true)
+  password         String?
   phoneNumber      String    @unique
   loginConfirmedAt DateTime?
   points           Int       @default(0)
@@ -105,6 +107,8 @@ model StepOption {
 enum StepOptionType {
   ICONIC_SELECT
   SIMPLE_SELECT
+  NUMBER_SELECT
+  DATE_SELECT
   INPUT
   TEXTAREA
   PAYMENT_METHOD

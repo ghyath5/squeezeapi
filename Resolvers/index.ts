@@ -1,6 +1,6 @@
-import {   NonEmptyArray} from 'type-graphql'
-import { Auth } from './Auth';
-import Service from './Services';
-import UserResolvers from './User';
 import './EnhanceResolvers'
-export default [Auth,...UserResolvers,...Service] as NonEmptyArray<Function>
+import {NonEmptyArray} from 'type-graphql'
+import globalResolvers from './Global'
+import dashboardResolvers from './Dashboard'
+import appResolvers from './App'
+export default [...globalResolvers,...appResolvers,...dashboardResolvers] as NonEmptyArray<Function>

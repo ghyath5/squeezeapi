@@ -1,7 +1,7 @@
 import { User } from "@prisma/client";
 import { ExpressContext } from "apollo-server-express";
-import { StoreType } from "../../redis";
-import { generateCode, generateToken } from "../../utils/auth";
+import { StoreType } from "../../../redis";
+import { generateCode, generateToken } from "../../../utils/auth";
 const config = {
     tokenExpiration:5*60, //seconds
     refreshTokenExpiration:7*24*60*60 //seconds

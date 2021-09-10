@@ -24,9 +24,9 @@ const ACCESS_FIELDS_ROLES = ["ADMIN", "MANAGER"];
 enhanceResolvers(
   ['User.updateUser'],
   [
-    Authorized(["USER", ...ACCESS_FIELDS_ROLES]),
+    Authorized(["USER"]),
     UseMiddleware(AuthorizeSelf()),
-    showFieldsOnlyFor(['USER',...ACCESS_FIELDS_ROLES])
+    showFieldsOnlyFor(['USER'])
   ]
 )
 enhanceRelationResolvers(

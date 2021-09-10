@@ -1,9 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import { ExpressContext } from 'apollo-server-express';
 import {  Arg, Authorized, Ctx, Extensions, Mutation, Resolver} from 'type-graphql'
-import { Context } from '../../@types/types';
-import { sufficientRoles } from '../../utils/auth';
-import {RateLimit, Guest } from '../CustomDecorators';
+import { Context } from '../../../@types/types';
+import { sufficientRoles } from '../../../utils/auth';
+import {RateLimit, Guest } from '../../CustomDecorators';
 import {  AuthResponse, LoginInputData, RegisterInputData, VerifyLoginResponse } from './types';
 
 
@@ -132,7 +132,7 @@ export class Auth {
     }
   }
 
-  @Extensions({check:(isLoggedIn,roles)=>Boolean(isLoggedIn)})
+  @Extensions({APP:true})
   @Authorized()
   @Mutation(()=>Boolean)
   logout(@Ctx() {ctx}:{ctx:ExpressContext}):Boolean{

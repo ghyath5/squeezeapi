@@ -1,29 +1,17 @@
 import { PrismaClient } from "@prisma/client";
-import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
-import {  Arg, Authorized, Ctx, Extensions, Mutation, NonEmptyArray, Query, Resolver } from "type-graphql";
-import { Context } from "../../@types/types";
-import { Role, User,UpdateUserResolver,UserRelationsResolver} from "../../prisma/generated/typegraphql";
+import { ExpressContext } from "apollo-server-express";
+import { Resolver } from "type-graphql";
+import { Extensions, Mutation, Arg, Ctx, NonEmptyArray } from "type-graphql";
+import { Context } from "./../../@types/types";
+import { UpdateUserResolver,User } from "../../prisma/generated/typegraphql";
 import { sufficientRoles } from "../../utils/auth";
 import { RateLimit } from "../CustomDecorators";
 import { ChangeNumberResponse, UpdatePhoneNumberInput } from "./types";
 
-
-@Resolver()
-export class Queries extends UserRelationsResolver{
-  @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&!sufficientRoles(['UNCONFIRMED'],roles)})
-  @Authorized(Role.USER)
-  @Query(()=>User)
-  async me(@Ctx() {prisma,ctx}:{prisma:PrismaClient,ctx:ExpressContext}):Promise<User>{
-    let me = await prisma.user.findUnique({where:{id:ctx.req.payload.userId}}) as User
-    return me;
-  }
-}
-
 @Resolver()
 export class Mutations extends UpdateUserResolver{
   @RateLimit({window:30,max:1,errorMessage:'wait 30 seconds'})
-  @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&!sufficientRoles(['UNCONFIRMED'],roles)})
-  @Authorized(Role.USER)
+  @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&sufficientRoles(['USER'],roles)})
   @Mutation(()=>ChangeNumberResponse)
   async updatePhoneNumber(
     @Arg("newPhoneNumber") phoneNumber:string,
@@ -44,8 +32,7 @@ export class Mutations extends UpdateUserResolver{
     };
   }
 
-  @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&!sufficientRoles(['UNCONFIRMED'],roles)})
-  @Authorized(Role.USER)
+  @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&sufficientRoles(['USER'],roles)})
   @Mutation(()=>User)
   async verifyPhoneNumberChange(
     @Arg("UpdateInput") updatePhoneInputs:UpdatePhoneNumberInput,
@@ -78,5 +65,4 @@ export class Mutations extends UpdateUserResolver{
   }
 }
 
-
-export default [Mutations,Queries] as NonEmptyArray<Function>
+export default [Mutations] as NonEmptyArray<Function>
