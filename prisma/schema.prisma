@@ -35,11 +35,11 @@ model User {
 }
 
 model Order {
-  id        String      @id @default(uuid())
-  status    OrderStatus
-  user      User        @relation(fields: [userId], references: [id])
-  userId    String
-  address   Address     @relation(fields: [addressId], references: [id])
+  id        String       @id @default(uuid())
+  status    OrderStatus?
+  user      User?        @relation(fields: [userId], references: [id])
+  userId    String?
+  address   Address      @relation(fields: [addressId], references: [id])
   addressId Int
 
   service   Service @relation(fields: [serviceId], references: [id])
