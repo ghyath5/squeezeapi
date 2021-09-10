@@ -47,8 +47,5 @@
     "reflect-metadata": "^0.1.13",
     "ts-node": "^10.2.0",
     "type-graphql": "^1.1.1"
-  },
-  "prisma": {
-    "schema": "prisma/schema.prisma"
   }
 }
