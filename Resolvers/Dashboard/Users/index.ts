@@ -1,14 +1,11 @@
 import './EnhanceTypes'
 import {  Resolver} from 'type-graphql'
-import { FindManyUserResolver, } from '../../../prisma/generated/typegraphql';
-
+import { FindManyUserResolver,AggregateUserResolver } from '../../../prisma/generated/typegraphql';
 
 @Resolver()
-class Queries extends FindManyUserResolver{
+class Queries {
     
 }
 
 
-export default [Queries]
-
-
+export default [Queries,FindManyUserResolver,AggregateUserResolver]

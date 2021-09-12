@@ -3,7 +3,7 @@ import { enhanceResolvers } from "../../../utils/helpers";
 
 
 enhanceResolvers([
-    'User.users'
+    'User._all'
 ],
 [
     Extensions({ADMIN:true})
