@@ -48,7 +48,7 @@ async function startApolloServer() {
   // schema = applyMiddleware(schema, middleware);
   const app = express();
   
-  const corsOptions:CorsOptions = {credentials: true, origin:process.env.WHITE_LIST_DOMAINS}
+  const corsOptions:CorsOptions = {credentials: true, origin: ['https://studio.apollographql.com','http://localhost:3000',"https://api.squeezecleaning.com"]}
   const server = new ApolloServer({
     formatError: (error) => {
       return {
