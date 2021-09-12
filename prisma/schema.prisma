@@ -42,9 +42,10 @@ model Order {
   address   Address      @relation(fields: [addressId], references: [id])
   addressId Int
 
-  service   Service @relation(fields: [serviceId], references: [id])
+  service   Service  @relation(fields: [serviceId], references: [id])
   serviceId Int
-
+  /// @TypeGraphQL.omit(input: true)
+  cost      Decimal
   details   Json     @default("{}")
   /// @TypeGraphQL.omit(input: true)
   createdAt DateTime @default(now())
