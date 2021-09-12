@@ -1,5 +1,4 @@
-import { Authorized, UseMiddleware, Extensions } from "type-graphql";
-import { AuthorizeSelf } from "../../../middlewares";
+import { Extensions } from "type-graphql";
 import {
   applyInputTypesEnhanceMap,
 } from "../../../prisma/generated/typegraphql";
