@@ -19,22 +19,22 @@ import { PruneSchema, wrapSchema } from '@graphql-tools/wrap';
 import { FilterSchema } from "./limitIntrospection";
 import { fieldExtensionsEstimator, getComplexity, simpleEstimator } from "graphql-query-complexity";
 import depthLimit from 'graphql-depth-limit'
-import { PrismaSelectFields } from "./middlewares";
+// import { PrismaSelectFields } from "./middlewares";
 const prisma = new PrismaClient();
-// const middleware = async (resolve, root, args, context, info: GraphQLResolveInfo) => {
-//   const result = new PrismaSelect(info).value;
-//   if (Object.keys(result.select).length > 0) {
-//     args = {
-//       ...args,
-//       ...result,
-//     };
-//   }
-//   return resolve(root, args, context, info) 
-// };
+const middleware = async (resolve, root, args, context, info: GraphQLResolveInfo) => {
+  const result = new PrismaSelect(info).value;
+  if (result?.select && Object.keys(result?.select).length > 0) {
+    args = {
+      ...args,
+      ...result,
+    };
+  }
+  return resolve(root, args, context, info) 
+};
 async function startApolloServer() {
   let schema = await buildSchema({
     resolvers,
-    globalMiddlewares:[PrismaSelectFields()],
+    // globalMiddlewares:[PrismaSelectFields()],
     authChecker:({context}:{context:Context},roles)=>{
       let req = context?.ctx?.req
       if(!req?.payload)return false;
@@ -45,12 +45,14 @@ async function startApolloServer() {
       return false
     }
   });
-  // schema = applyMiddleware(schema, middleware);
+  schema = applyMiddleware(schema, middleware);
   const app = express();
   
   const corsOptions:CorsOptions = {credentials: true, origin: ['https://studio.apollographql.com','http://localhost:3000',"https://api.squeezecleaning.com"]}
   const server = new ApolloServer({
     formatError: (error) => {
+      console.log(error.extensions?.exception);
+      
       return {
         message:error.message,
         validationErrors:error.extensions?.exception?.validationErrors

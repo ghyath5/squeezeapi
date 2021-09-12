@@ -4,15 +4,15 @@ import { MiddlewareFn } from "type-graphql";
 import { Context } from "./@types/types";
 import { sufficientRoles } from "./utils/auth";
 
-export function PrismaSelectFields():MiddlewareFn<any> {
-    return async ({ context, info,args,root, }:{context:Context,info:GraphQLResolveInfo,args:any,root:any}, next) => {
-        const result = new PrismaSelect(info).value;
-        if (Object.keys(result.select).length > 0) {
-            args.select = result.select
-        }
-        return next();
-    }
-};
+// export function PrismaSelectFields():MiddlewareFn<any> {
+//     return async ({ context, info,args,root, }:{context:Context,info:GraphQLResolveInfo,args:any,root:any}, next) => {
+//         const result = new PrismaSelect(info).value;
+//         if (Object.keys(result?.select).length > 0) {
+//             args.select = result.select
+//         }
+//         return next();
+//     }
+// };
 
 // export const UnupdatableFields: MiddlewareFn<any> = async ({ context, info,args,root, }:{context:Context,info:GraphQLResolveInfo,args:any,root:any}, next) => {
 //     const payload = context?.ctx?.req?.payload
