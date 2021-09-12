@@ -8,7 +8,7 @@
     "start": "ts-node dist/app.js",
     "generate": "ts-node ./prisma/generator.ts",
     "build": "tsc -p .",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma db push"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
