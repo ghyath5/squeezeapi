@@ -1,4 +1,5 @@
-import { createMethodDecorator, UseMiddleware } from "type-graphql";
+import { PrismaSelect } from "@paljs/plugins";
+import { createMethodDecorator, createParamDecorator, UseMiddleware } from "type-graphql";
 import { Context } from "../@types/types";
 export function Guest() {
     return createMethodDecorator(async ({context}:{context:Context}, next) => {
@@ -30,5 +31,16 @@ export function RateLimit({window, max, errorMessage}:{window:number,max:number,
         quickStore.set(key, "1", window);
       }
       return next();
+  });
+}
+
+
+export function Fields(): ParameterDecorator {
+  return createParamDecorator(({ info }) => {
+      const result = new PrismaSelect(info).value;
+      if (Object.keys(result.select).length > 0) {
+        return result;
+      }
+      return false
   });
 }
