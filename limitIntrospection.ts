@@ -23,6 +23,9 @@ export class FilterSchema {
         if(typeExtensions?.APP || fieldExtensions?.APP){
             return roles?.length && roles.includes('USER')
         }
+        if(typeExtensions?.ADMIN || fieldExtensions?.ADMIN){
+            return roles?.length && roles.includes('ADMIN')
+        }
         return true;
     }
     transformSchema(originalWrappingSchema:GraphQLSchema) {

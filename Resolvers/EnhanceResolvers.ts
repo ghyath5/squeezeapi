@@ -7,20 +7,10 @@ import { applyDecoratorsFields, enhanceInputTypes, enhanceRelationResolvers, enh
 
 const ACCESS_FIELDS_ROLES = ["ADMIN", "MANAGER"];
 
-
-// applyResolversEnhanceMap({
-//   User: {
-//     updateUser: [
-//       Authorized(["USER", ...ACCESS_FIELDS_ROLES]),
-//       UseMiddleware(AuthorizeSelf()),
-//       Extensions({
-//         check: (isLoggedIn: Boolean, roles: string[]) =>
-//           isLoggedIn && !sufficientRoles(["UNCONFIRMED"], roles),
-//       }),
-//     ],
-//   },
-// });
-
+enhanceResolvers(
+  ['Order._all'],
+  [showFieldsOnlyFor(ACCESS_FIELDS_ROLES)]
+)
 enhanceResolvers(
   ['User.updateUser'],
   [
@@ -36,7 +26,7 @@ enhanceRelationResolvers(
   [Extensions({ hide: true })]
 )
 const hiddenInputFieldsUserUpdateInput = applyDecoratorsFields(
-  ["phoneNumber", "loginConfirmedAt", "updatedAt", "createdAt", "role", "id","orders","points"],
+  ["phoneNumber", "loginConfirmedAt", "role", "id","orders","points"],
   Extensions({ hide: true })
 );
 applyInputTypesEnhanceMap({
