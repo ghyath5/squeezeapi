@@ -20,7 +20,7 @@ model User {
   firstName        String
   lastName         String
   email            String?   @unique
-  /// @TypeGraphQL.omit(output: true)
+  /// @TypeGraphQL.omit(input: true, output: true)
   password         String?
   phoneNumber      String    @unique
   loginConfirmedAt DateTime?
