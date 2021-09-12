@@ -1,4 +1,6 @@
+import { Decimal } from "@prisma/client/runtime";
 import { Extensions, Field, InputType, ObjectType } from "type-graphql";
+import { OrderCreateInput } from "../../../prisma/generated/typegraphql";
 
 @ObjectType()
 export class MakeOrderResponse {
@@ -9,23 +11,6 @@ export class MakeOrderResponse {
   isSuccess:Boolean
 }
 
-// @InputType()
-// export class RegisterInputData {
-//   @Field({nullable:true})
-//   email?:string
-
-//   @Field()
-//   phoneNumber:string
-
-//   @Field()
-//   firstName:string
-
-//   @Field()
-//   lastName:string
-// }
-
-// @InputType()
-// export class LoginInputData {
-//   @Field()
-//   phoneNumber:string  
-// }
+export interface OrderData extends OrderCreateInput {
+  cost:string | number | Decimal
+}
