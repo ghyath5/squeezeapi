@@ -15,7 +15,10 @@ export class Queries extends UserRelationsResolver{
   ):Promise<User>{
     let me = await prisma.user.findUnique({
       where:{id:ctx.req.payload.userId},
-      ...fields
+      select:{
+        id:true,
+        ...fields.select
+      }
     }) as User    
     return me;
   }

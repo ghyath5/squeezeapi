@@ -32,7 +32,7 @@ export class Mutations extends UpdateUserResolver{
     };
   }
 
-  @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&sufficientRoles(['USER'],roles)})
+  @Extensions({APP:true})
   @Mutation(()=>User)
   async verifyPhoneNumberChange(
     @Arg("UpdateInput") updatePhoneInputs:UpdatePhoneNumberInput,
