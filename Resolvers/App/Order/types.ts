@@ -11,6 +11,8 @@ export class MakeOrderResponse {
   isSuccess:Boolean
 }
 
-export interface OrderData extends OrderCreateInput {
-  cost:string | number | Decimal
+// @InputType({isAbstract:true})
+export class OrderData extends OrderCreateInput {
+  // @Field()
+  cost: Decimal | number | string
 }

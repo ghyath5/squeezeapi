@@ -8,7 +8,8 @@
     "start": "ts-node dist/app.js",
     "generate": "ts-node ./prisma/generator.ts",
     "build": "tsc -p .",
-    "postinstall": "dotenv -e .env.local npx prisma db push"
+    "postinstall": "prisma generate",
+    "prisma-push": "prisma db push"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
@@ -18,7 +19,6 @@
     "@types/jsonwebtoken": "^8.5.4",
     "@types/node": "^16.6.1",
     "@types/redis": "^2.8.31",
-    "dotenv-cli": "^4.0.0",
     "express": "^4.17.1",
     "prisma": "^3.0.2",
     "ts-node-dev": "^1.1.8",
