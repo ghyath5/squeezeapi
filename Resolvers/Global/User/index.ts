@@ -6,7 +6,7 @@ import { sufficientRoles } from "../../../utils/auth";
 import { Fields } from "../../CustomDecorators";
 
 @Resolver()
-export class Queries extends UserRelationsResolver{
+export class Queries {
   @Extensions({check:(isLoggedIn,roles)=>isLoggedIn&&!sufficientRoles(['UNCONFIRMED'],roles)})
   @Query(()=>User)
   async me(
@@ -24,4 +24,4 @@ export class Queries extends UserRelationsResolver{
   }
 }
 
-export default [Queries] as NonEmptyArray<Function>
+export default [Queries,UserRelationsResolver] as NonEmptyArray<Function>
