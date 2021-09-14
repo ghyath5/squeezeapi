@@ -36,21 +36,21 @@ applyInputTypesEnhanceMap({
 });
 
 enhanceInputTypes(
-  ['AddressUpdateManyWithoutUserInput.fields.upsert'],
+  [
+    //'AddressUpdateManyWithoutUserInput.fields.upsert',
+    'AddressUpdateManyWithoutUserInput.fields.create',
+    'AddressUpdateManyWithoutUserInput.fields.update',
+    'AddressUpdateManyWithoutUserInput.fields.delete'
+  ],
   [showFieldsOnlyFor(['ADMIN','USER','MANAGER'])]
 )
 enhanceInputTypes(
     [
       'AddressUpdateManyWithoutUserInput.fields._all',
       'OrderCreateNestedManyWithoutAddressInput.class',
-      'OrderUpdateManyWithoutAddressInput.class',
-      'AddressUpdateWithoutUserInput.fields.updatedAt',
-      'AddressUpdateWithoutUserInput.fields.createdAt',
-      'AddressCreateWithoutUserInput.fields.createdAt',
-      'AddressCreateWithoutUserInput.fields.updatedAt',
+      'OrderUpdateManyWithoutAddressInput.class'
     ],
     [
-      Extensions({ hide: true }),
-      Authorized(ACCESS_FIELDS_ROLES),
+      Extensions({ hide: true })
     ]
 )
