@@ -25,7 +25,7 @@ export const verifyToken = async (ctx:ExpressContext,token: string):Promise<Bool
       let payload = jwt.verify(token, (process.env.APP_SECRET as string)) as jwt.JwtPayload
       ctx.req.payload = payload
       return payload;
-    }catch(e){
+    }catch(e:any){
       if(e.message == 'jwt expired'){
         let refreshtoken = ctx.req?.cookies['x-refresh-token']
         if(!refreshtoken)return false;
